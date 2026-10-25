@@ -5,10 +5,10 @@ import { formatPrice } from "@/lib/utils";
 
 export default function ProductCard({ product }) {
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-[1.5rem] border border-zinc-200 bg-white transition duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-zinc-200/80">
+    <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-zinc-200 bg-white transition duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-zinc-200/80">
       <Link
         href={`/products/${product.slug}`}
-        className="relative block aspect-[5/4] overflow-hidden bg-white"
+        className="relative block aspect-5/4 overflow-hidden bg-white"
       >
         {product.badge ? (
           <span className="absolute top-4 left-4 z-10 rounded-full bg-white px-3 py-1 text-xs font-semibold text-zinc-950 shadow-sm">
