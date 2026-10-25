@@ -1,15 +1,39 @@
 rules_version = '2';
+
+/**
+ * Personal Ledger — Firestore Security Rules
+ *
+ * APPLY IN FIREBASE CONSOLE (required — editing this file alone is not enough):
+ * 1. Open:
+ *    https://console.firebase.google.com/project/personal-ledger-a5d46/firestore/rules
+ * 2. Delete the existing rules and paste everything below
+ * 3. Click Publish
+ *
+ * Ledger records stay private to signed-in users.
+ * The shop catalog is public to read. Website checkout can create orders
+ * and reduce stock. Only a signed-in admin can add products or change status.
+ */
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    function signedIn() {
+
+    function isSignedIn() {
       return request.auth != null;
     }
 
-    function isCloudinaryImage(url) {
-      return url.matches('^https://res\\.cloudinary\\.com/cl_whooweswho/image/upload/.+');
+    function isConfiguredBusiness(businessId) {
+      return businessId == 'default';
     }
 
-    function isProduct(data) {
+    function canAccessBusiness(businessId) {
+      return isSignedIn() && isConfiguredBusiness(businessId);
+    }
+
+    function isCloudinaryImage(url) {
+      return url.matches('^https://res\\.cloudinary\\.com/de7j5itjg/image/upload/.+');
+    }
+
+    function isStoreProduct(data) {
       return data.keys().hasOnly([
           'slug',
           'name',
@@ -63,7 +87,7 @@ service cloud.firestore {
         && request.resource.data.stock < resource.data.stock;
     }
 
-    function isOrder(data) {
+    function isStoreOrder(data) {
       return data.keys().hasOnly([
           'createdAt',
           'status',
@@ -97,25 +121,33 @@ service cloud.firestore {
         && data.items.size() <= 20;
     }
 
-    match /products/{id} {
-      allow read: if true;
-      allow create: if signedIn()
-        && isProduct(request.resource.data)
-        && request.resource.data.slug == id
-        && isCloudinaryImage(request.resource.data.image);
-      allow update: if (
-          signedIn()
-          && isProduct(request.resource.data)
-          && request.resource.data.slug == id
-        )
-        || stockDecrease();
-      allow delete: if signedIn();
+    match /businesses/{businessId}/{collection}/{docId} {
+      allow read, write: if canAccessBusiness(businessId)
+        && collection in ['products', 'purchases', 'sales', 'expenses', 'contributions'];
     }
 
-    match /orders/{id} {
-      allow read: if signedIn();
-      allow create: if id.matches('^OA-[0-9]{6}$') && isOrder(request.resource.data);
-      allow update: if signedIn()
+    match /businesses/{businessId}/storeProducts/{productId} {
+      allow read: if isConfiguredBusiness(businessId);
+      allow create: if canAccessBusiness(businessId)
+        && isStoreProduct(request.resource.data)
+        && request.resource.data.slug == productId
+        && isCloudinaryImage(request.resource.data.image);
+      allow update: if (
+          canAccessBusiness(businessId)
+          && isStoreProduct(request.resource.data)
+          && request.resource.data.slug == productId
+        )
+        || (isConfiguredBusiness(businessId) && stockDecrease());
+      allow delete: if canAccessBusiness(businessId);
+    }
+
+    match /businesses/{businessId}/storeOrders/{orderId} {
+      allow get: if isConfiguredBusiness(businessId) && resource == null;
+      allow read: if canAccessBusiness(businessId);
+      allow create: if isConfiguredBusiness(businessId)
+        && orderId.matches('^OA-[0-9]{6}$')
+        && isStoreOrder(request.resource.data);
+      allow update: if canAccessBusiness(businessId)
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'note'])
         && request.resource.data.status in [
           'New',
@@ -130,12 +162,13 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    match /tracking/{id} {
-      allow read: if true;
-      allow create: if id.matches('^OA-[0-9]{6}$')
+    match /businesses/{businessId}/storeTracking/{orderId} {
+      allow read: if isConfiguredBusiness(businessId);
+      allow create: if isConfiguredBusiness(businessId)
+        && orderId.matches('^OA-[0-9]{6}$')
         && request.resource.data.keys().hasOnly(['status'])
         && request.resource.data.status == 'New';
-      allow update: if signedIn()
+      allow update: if canAccessBusiness(businessId)
         && request.resource.data.keys().hasOnly(['status'])
         && request.resource.data.status in [
           'New',
@@ -146,6 +179,10 @@ service cloud.firestore {
           'Cancelled'
         ];
       allow delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
