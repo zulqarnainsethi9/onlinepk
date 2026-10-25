@@ -4,6 +4,8 @@ export const products = [
     slug: "air-buds-pro-2-anc",
     name: "Air Buds Pro 2 ANC",
     price: 1799,
+    badge: "ANC",
+    highlights: ["Charging case", "Carrying lanyard"],
     shortDescription:
       "Wireless earbuds designed for convenient everyday listening.",
     description:
@@ -40,6 +42,8 @@ export const products = [
     slug: "air-39-wireless-earbuds",
     name: "Air 39 Wireless Earbuds",
     price: 1199,
+    badge: "LED case",
+    highlights: ["Battery display", "Bluetooth 5.3"],
     shortDescription: "Wireless stereo earbuds for everyday listening.",
     description:
       "Air 39 Wireless Earbuds deliver a wireless stereo experience with a distinctive transparent charging case and digital battery display. Practical details like Type-C charging and integrated microphones make them a solid everyday option.",
@@ -72,6 +76,39 @@ export const products = [
       "Integrated microphones for clear voice calls",
       "Magnetic charging contacts for precise connections",
       "Precision hinge construction on the charging case",
+    ],
+  },
+  {
+    id: "buds-pro-9-tw",
+    slug: "buds-pro-9-tw",
+    name: "Buds Pro 9 TW Wireless Earbuds",
+    price: 2250,
+    badge: "ANC/ENC",
+    highlights: ["Noise reduction", "Touch control"],
+    shortDescription:
+      "Wireless earbuds with ANC/ENC and touch control, as shown on the packaging.",
+    description:
+      "Buds Pro 9 TW Wireless Earbuds are a stem-style pair that come with a charging case. The box lists ANC/ENC, double dark noise reduction, and touch control.",
+    image: "/images/buds-pro-9-tw.png",
+    images: [
+      {
+        src: "/images/buds-pro-9-tw.png",
+        alt: "Buds Pro 9 TW wireless earbuds inside an open charging case with a green LED",
+      },
+      {
+        src: "/images/buds-pro-9-tw-2.png",
+        alt: "Pair of Buds Pro 9 TW wireless earbuds",
+      },
+      {
+        src: "/images/buds-pro-9-tw-3.png",
+        alt: "Buds Pro 9 box showing ANC/ENC, double dark noise reduction, and touch control",
+      },
+    ],
+    features: [
+      "ANC/ENC as shown on the product packaging",
+      "Double dark noise reduction as shown on the product packaging",
+      "Touch control as shown on the product packaging",
+      "Charging case with a front LED indicator",
     ],
   },
 ];

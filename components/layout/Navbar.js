@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useCart } from "@/components/cart/CartProvider";
 import { siteConfig } from "@/data/site";
 import { cn } from "@/lib/utils";
 
 export default function Navbar() {
   const pathname = usePathname();
+  const { count } = useCart();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -56,16 +58,15 @@ export default function Navbar() {
           })}
         </nav>
 
-        <div className="hidden md:block">
+        <div className="flex items-center gap-2">
+          <CartLink count={count} active={pathname.startsWith("/checkout")} />
           <Link
             href="/shop"
-            className="inline-flex min-h-10 items-center rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+            className="hidden min-h-10 items-center rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-blue-700 md:inline-flex"
           >
             Shop Now
           </Link>
-        </div>
-
-        <button
+          <button
           type="button"
           className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-zinc-200 text-zinc-800 md:hidden"
           aria-expanded={open}
@@ -97,6 +98,7 @@ export default function Navbar() {
             </svg>
           )}
         </button>
+        </div>
       </div>
 
       {open ? (
@@ -131,6 +133,13 @@ export default function Navbar() {
               );
             })}
             <Link
+              href="/checkout"
+              onClick={closeMenu}
+              className="rounded-xl px-4 py-3 text-base font-medium text-zinc-700 hover:bg-zinc-50"
+            >
+              Cart{count > 0 ? ` (${count})` : ""}
+            </Link>
+            <Link
               href="/shop"
               onClick={closeMenu}
               className="mt-2 inline-flex min-h-11 items-center justify-center rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white"
@@ -141,5 +150,38 @@ export default function Navbar() {
         </div>
       ) : null}
     </header>
+  );
+}
+
+function CartLink({ count, active }) {
+  return (
+    <Link
+      href="/checkout"
+      aria-label={
+        count === 0 ? "Cart" : `Cart, ${count} ${count === 1 ? "item" : "items"}`
+      }
+      className={cn(
+        "relative inline-flex h-11 w-11 items-center justify-center rounded-xl border border-zinc-200 text-zinc-800",
+        active && "border-blue-200 bg-blue-50 text-blue-700",
+      )}
+    >
+      <svg
+        viewBox="0 0 24 24"
+        className="h-5 w-5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        aria-hidden="true"
+      >
+        <path d="M6 7h15l-1.5 9h-12z" />
+        <path d="M6 7 5 4H2" />
+        <path d="M9 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm8 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2z" />
+      </svg>
+      {count > 0 ? (
+        <span className="absolute -top-1.5 -right-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-600 px-1 text-[11px] font-semibold text-white">
+          {count}
+        </span>
+      ) : null}
+    </Link>
   );
 }

@@ -20,7 +20,8 @@ export default function ContactPage() {
           </h1>
           <p className="text-lg leading-relaxed text-zinc-600">
             Have a question about Air Buds Pro 2 ANC, Air 39 Wireless Earbuds,
-            or availability? Reach out by email or WhatsApp.
+            Buds Pro 9 TW Wireless Earbuds, or availability? Reach out by email
+            or WhatsApp.
           </p>
         </div>
 

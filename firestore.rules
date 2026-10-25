@@ -1,0 +1,151 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isCloudinaryImage(url) {
+      return url.matches('^https://res\\.cloudinary\\.com/cl_whooweswho/image/upload/.+');
+    }
+
+    function isProduct(data) {
+      return data.keys().hasOnly([
+          'slug',
+          'name',
+          'price',
+          'stock',
+          'badge',
+          'highlights',
+          'shortDescription',
+          'description',
+          'features',
+          'image',
+          'images',
+          'createdAt'
+        ])
+        && data.slug is string
+        && data.slug.size() > 0
+        && data.slug.size() < 80
+        && data.name is string
+        && data.name.size() > 0
+        && data.name.size() < 140
+        && data.price is number
+        && data.price > 0
+        && data.price < 10000000
+        && data.stock is int
+        && data.stock >= 0
+        && data.stock < 1000000
+        && data.badge is string
+        && data.badge.size() < 40
+        && data.highlights is list
+        && data.highlights.size() <= 8
+        && data.shortDescription is string
+        && data.shortDescription.size() > 0
+        && data.shortDescription.size() < 400
+        && data.description is string
+        && data.description.size() < 4000
+        && data.features is list
+        && data.features.size() <= 40
+        && data.image is string
+        && data.image.size() < 600
+        && data.images is list
+        && data.images.size() > 0
+        && data.images.size() <= 8
+        && data.createdAt is string
+        && data.createdAt.size() == 24;
+    }
+
+    function stockDecrease() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['stock'])
+        && request.resource.data.stock is int
+        && request.resource.data.stock >= 0
+        && request.resource.data.stock < resource.data.stock;
+    }
+
+    function isOrder(data) {
+      return data.keys().hasOnly([
+          'createdAt',
+          'status',
+          'channel',
+          'customer',
+          'items',
+          'note'
+        ])
+        && data.createdAt is string
+        && data.createdAt.size() == 24
+        && data.status == 'New'
+        && data.channel == 'Website'
+        && data.note == ''
+        && data.customer.keys().hasOnly(['name', 'phone', 'city', 'address', 'note'])
+        && data.customer.name is string
+        && data.customer.name.size() > 0
+        && data.customer.name.size() < 80
+        && data.customer.phone is string
+        && data.customer.phone.size() >= 10
+        && data.customer.phone.size() < 20
+        && data.customer.city is string
+        && data.customer.city.size() > 0
+        && data.customer.city.size() < 80
+        && data.customer.address is string
+        && data.customer.address.size() >= 8
+        && data.customer.address.size() < 300
+        && data.customer.note is string
+        && data.customer.note.size() < 500
+        && data.items is list
+        && data.items.size() > 0
+        && data.items.size() <= 20;
+    }
+
+    match /products/{id} {
+      allow read: if true;
+      allow create: if signedIn()
+        && isProduct(request.resource.data)
+        && request.resource.data.slug == id
+        && isCloudinaryImage(request.resource.data.image);
+      allow update: if (
+          signedIn()
+          && isProduct(request.resource.data)
+          && request.resource.data.slug == id
+        )
+        || stockDecrease();
+      allow delete: if signedIn();
+    }
+
+    match /orders/{id} {
+      allow read: if signedIn();
+      allow create: if id.matches('^OA-[0-9]{6}$') && isOrder(request.resource.data);
+      allow update: if signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'note'])
+        && request.resource.data.status in [
+          'New',
+          'Confirmed',
+          'Packed',
+          'Shipped',
+          'Delivered',
+          'Cancelled'
+        ]
+        && request.resource.data.note is string
+        && request.resource.data.note.size() < 1000;
+      allow delete: if false;
+    }
+
+    match /tracking/{id} {
+      allow read: if true;
+      allow create: if id.matches('^OA-[0-9]{6}$')
+        && request.resource.data.keys().hasOnly(['status'])
+        && request.resource.data.status == 'New';
+      allow update: if signedIn()
+        && request.resource.data.keys().hasOnly(['status'])
+        && request.resource.data.status in [
+          'New',
+          'Confirmed',
+          'Packed',
+          'Shipped',
+          'Delivered',
+          'Cancelled'
+        ];
+      allow delete: if false;
+    }
+  }
+}

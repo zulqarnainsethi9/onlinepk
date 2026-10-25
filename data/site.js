@@ -18,6 +18,7 @@ export const siteConfig = {
     { label: "Home", href: "/" },
     { label: "Shop", href: "/shop" },
     { label: "About", href: "/about" },
+    { label: "Track", href: "/track-parcel" },
     { label: "Contact", href: "/contact" },
   ],
   announcement: "Free delivery updates coming soon — browse our wireless earbuds today.",
