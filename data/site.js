@@ -21,7 +21,7 @@ export const siteConfig = {
     { label: "Track", href: "/track-parcel" },
     { label: "Contact", href: "/contact" },
   ],
-  announcement: "Free delivery updates coming soon — browse our wireless earbuds today.",
+  announcement: "Wireless earbuds in PKR. Checkout on the site and track your order.",
 };
 
 export function getWhatsAppUrl(message = "") {
