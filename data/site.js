@@ -1,8 +1,8 @@
 export const siteConfig = {
-  name: "onlineAccessories",
+  name: "OnlineAccessories",
   tagline: "Everyday wireless audio, delivered with care.",
   description:
-    "onlineAccessories is an online electronics storefront focused on convenient access to wireless earbuds and everyday technology accessories.",
+    "OnlineAccessories is an online electronics storefront focused on convenient access to wireless earbuds and everyday technology accessories.",
   url: "https://onlineaccessories.pk",
   currency: "PKR",
   locale: "en-PK",
